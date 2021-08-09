@@ -1,18 +1,19 @@
-const isDev = false;
+const isDev = !Boolean(this.document);
 
 let fs = isDev ? require('fs') : null;
-let rowString = null;
 if(isDev) {
   // 获取源代码
-  rowString = fs.readFileSync('./d0_after_free.rpy').toString();
+  const codeSource = fs.readFileSync('./code_source.rpy').toString();
   // 解析代码，提取内容
-  const { parseResult, contentList } = rpy2content(rowString);
+  const { parseResult, contentList } = rpy2content(codeSource);
   const translateRowText = contentList.map(content => content.textContent).join('\n');
-  fs.writeFileSync('./content.txt', translateRowText);
+  fs.writeFileSync('./translate_source.txt', translateRowText);
+  /* 中间是通过deepl翻译原文，将翻译结果放入translate_result中 */
   // 获取翻译内容，合并输出
-  const translateString = fs.readFileSync('./translate.txt').toString();
-  const finalString = translate2code(translateString, contentList, parseResult);
-  fs.writeFileSync('final.rpy', finalString.join('\n'));
+  const translateString = fs.readFileSync('./translate_result.txt').toString();
+  const translateList = translateString.replace(/\r/g, '').split('\n');
+  const codeTarget = translate2code(translateList, contentList, parseResult);
+  fs.writeFileSync('./code_target.rpy', codeTarget);
 } else {
   // 注入输入框
   const parent = document.querySelector('.lmt__text');
