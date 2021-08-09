@@ -1,11 +1,20 @@
 const isDev = false;
 
-// 初始化节点
-let area1 = null;
-let area2 = null;
-let area3 = null;
-let area4 = null;
+let fs = isDev ? require('fs') : null;
+let rowString = null;
 if(isDev) {
+  // 获取源代码
+  rowString = fs.readFileSync('./d0_after_free.rpy').toString();
+  // 解析代码，提取内容
+  const { parseResult, contentList } = rpy2content(rowString);
+  const translateRowText = contentList.map(content => content.textContent).join('\n');
+  fs.writeFileSync('./content.txt', translateRowText);
+  // 获取翻译内容，合并输出
+  const translateString = fs.readFileSync('./translate.txt').toString();
+  const finalString = translate2code(translateString, contentList, parseResult);
+  fs.writeFileSync('final.rpy', finalString.join('\n'));
+} else {
+  // 注入输入框
   const parent = document.querySelector('.lmt__text');
   const trueArea = document.querySelector('.lmt__sides_container');
   const root = document.createElement('div');
@@ -31,46 +40,56 @@ if(isDev) {
     </div>
   `;
   parent.insertBefore(root, trueArea);
-  [area1, area2, area3, area4] = document.querySelectorAll('textarea');
+  const [area1, area2, area3, area4] = document.querySelectorAll('textarea');
+  // 监听原代码区内容变化
+  let parseResult = null;
+  let contentList = null;
   area1.addEventListener('input', (e) => {
+    // 处理后注入到翻译原文区
+    console.log('检测到新源码输入，开始解析源码');
     const value = e.target.value;
-    area3.value = value;
+    const { parseResult: _parseResult, contentList: _contentList } = rpy2content(value);
+    [parseResult, contentList] = [_parseResult, _contentList];
+    console.log('源码解析结果:', parseResult);
+    const translateRowText = contentList.map(content => content.textContent).join('\n');
+    area3.value = translateRowText;
+    console.log('提取的内容:', contentList);
+    // 发起输入事件触发翻译
     const fakeEvent = document.createEvent('HTMLEvents');
     fakeEvent.initEvent('input');
     area3.dispatchEvent(fakeEvent);
+    console.log('开始翻译...');
   });
+  // 轮询翻译后的结果
+  let translateResult = null;
+  setInterval(() => {
+    const value = area4.value;
+    // 新翻译结果
+    const translateList = value ? value.replace(/\r/g, '').split('\n') : [];
+    if(contentList.length !== translateList.length) {
+      console.log(`原文有${contentList.length}句，翻译有${translateList.length}句，等待继续翻译中...`);
+      return;
+    }
+    // 生成一次代码后，在更新源码前都不会再生成代码
+    if(translateResult != value) {
+      translateResult = value;
+      if(contentList.length === 0) {
+        console.log('原文中没有有效renpy翻译句段，请重新输入');
+        return;
+      }
+      console.log('翻译完成，翻译后的内容:', translateList);
+      console.log('开始转换为新代码');
+      const code = translate2code(translateList, contentList, parseResult);
+      area2.value = code;
+      console.log('处理完成');
+    }
+  }, 2000);
 }
-
-// 获取源文本
-let fs = isDev ? require('fs') : null;
-if(isDev) {
-  const rowString = fs.readFileSync('./d0_after_free.rpy').toString();
-} else {
-  
-}
-
-// 解析代码，提取内容
-const { parseResult, contentList } = rpy2content(rowString);
-const translateRowText = contentList.map(content => content.textContent).join('\n');
-
-// 将有效文本放入文本框
-if(isDev) {
-  fs.writeFileSync('./content.txt', translateRowText);
-} else {
-  area3.value = translateRowText;
-}
-
-/* 手动点击翻译按钮 */
-
-// 从文本框中读取翻译结果
-const translateString = fs.readFileSync('./translate.txt').toString();
-const finalString = translate2code(translateString, contentList, parseResult);
-fs.writeFileSync('final.rpy', finalString.join('\n'));
 
 // 解析rpy脚本，得出解析结果和内容
 function rpy2content (rowString) {
   // 处理文本，按行拆分，过滤空行，去除首空
-  const rowText = rowString.split('\r\n').filter(line => line);
+  const rowText = rowString.replace(/\r/g, '').split('\n').filter(line => line);
   const text = rowText.map(line => line.trim());
   
   // 判断每行文本的类型
@@ -150,11 +169,9 @@ function rpy2content (rowString) {
 }
 
 // 将翻译结果还原为代码
-function translate2code (translateString, contentList, parseResult) {
-  const translate = translateString.replace(/\r/g, '').split('\n')
-  if(translate.length !== contentList.length) return console.error('错误：翻译后的行数与翻译前不同，请联系林彼丢排查错误！');
+function translate2code (translateList, contentList, parseResult) {
   contentList.forEach((content, index) => {
-    content.translate = translate[index];
+    content.translate = translateList[index];
   });
   let lastIsSource = false;
   const finalString = parseResult.map(({ type, source, translate, textPrefix }, index) => {
@@ -169,6 +186,6 @@ function translate2code (translateString, contentList, parseResult) {
     }
     lastIsSource = false;
     return source;
-  }).filter(line => line);
+  }).filter(line => line).join('\n');
   return finalString;
 }
