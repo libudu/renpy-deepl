@@ -20,6 +20,7 @@ if(isDev) {
   const trueArea = document.querySelector('.lmt__sides_container');
   const root = document.createElement('div');
   root.className = 'lmt__sides_container';
+  root.style = "display: flex";
   root.innerHTML = `
     <div class="lmt__side_container lmt__side_container--source">
       <div class="lmt__textarea_container" style="padding: 10px">
