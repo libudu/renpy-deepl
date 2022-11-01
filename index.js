@@ -106,7 +106,7 @@ function rpy2content (rowString) {
     },
     {
       type: '2原文',
-      regex: /^# (\w* )?"(.*)"$/,
+      regex: /^# (.* )?"(.*)"$/,
     },
     {
       type: '3旧翻译',
