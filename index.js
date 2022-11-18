@@ -1,5 +1,9 @@
 const isDev = !Boolean(this.document);
 
+// 特殊情况：
+// 人物名+表情，如：henry surprised "what?"
+// 对话语句结束后存在后缀，如：nurse surprised "[mc]?! What in god's name?!" with vpunch
+
 let fs = isDev ? require('fs') : null;
 if(isDev) {
   // 获取源代码
@@ -106,11 +110,11 @@ function rpy2content (rowString) {
     },
     {
       type: '2原文',
-      regex: /^# (.* )?"(.*)"$/,
+      regex: /^# (.* )?"(.*)"(.*)/,
     },
     {
       type: '3旧翻译',
-      regex: /^(.* )?"(.*)"$/,
+      regex: /^(.* )?"(.*)"(.*)/,
     },
   ];
   function judgeType(line) {
@@ -125,14 +129,14 @@ function rpy2content (rowString) {
   const parseResult = text.map((line, index) => {
     const type = judgeType(line);
     if(type === '2原文') {
-      const start = line.indexOf('"');
-      const trueText = line.slice(start + 1, line.length - 1);
+      const [_, textPrefix, textContent, textSuffix] = line.match(typeTestList[2].regex);
       return {
         type,
         source: rowText[index],
         text: line,
-        textPrefix: line.slice(2, start),
-        textContent: trueText,
+        textPrefix,
+        textContent,
+        textSuffix,
         translate: '',
       };
     }
@@ -176,10 +180,10 @@ function translate2code (translateList, contentList, parseResult) {
     content.translate = translateList[index];
   });
   let lastIsSource = false;
-  const finalString = parseResult.map(({ type, source, translate, textPrefix }, index) => {
+  const finalString = parseResult.map(({ type, source, translate, textPrefix, textSuffix }, index) => {
     if(type === '2原文') {
       lastIsSource = true;
-      return `\n${source}\n    ${textPrefix}"${translate}"\n`;
+      return `\n${source}\n    ${textPrefix || ''}"${translate}"${textSuffix}\n`;
     }
     // 如果上一句原文已经有新翻译了，就不使用旧翻译
     if(type === '3旧翻译' && lastIsSource) {
