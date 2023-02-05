@@ -46,7 +46,8 @@ if(isDev) {
     </div>
   `;
   parent.insertBefore(root, trueArea);
-  const [area1, area2, area3, area4] = document.querySelectorAll('textarea');
+  const [area3, area4] = document.querySelectorAll('d-textarea');
+  const [area1, area2] = document.querySelectorAll('textarea');
   // 监听原代码区内容变化
   let parseResult = null;
   let contentList = null;
@@ -72,6 +73,7 @@ if(isDev) {
     const value = area4.value;
     // 新翻译结果
     const translateList = value ? value.replace(/\r/g, '').split('\n') : [];
+    if(!contentList) return;
     if(contentList.length !== translateList.length) {
       console.log(`原文有${contentList.length}句，翻译有${translateList.length}句，等待继续翻译中...`);
       return;
