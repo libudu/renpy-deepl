@@ -46,8 +46,16 @@ if(isDev) {
     </div>
   `;
   parent.insertBefore(root, trueArea);
-  const [area3, area4] = document.querySelectorAll('d-textarea');
-  const [area1, area2] = document.querySelectorAll('textarea');
+  let area1, area2, area3, area4;
+  // 存在d-textarea，非会员页面
+  if(document.querySelectorAll('d-textarea').length > 0) {
+    [area3, area4] = document.querySelectorAll('d-textarea');
+    [area1, area2] = document.querySelectorAll('textarea');
+  }
+  // 不存在textarea，会员页面
+  else {
+    [area1, area2, area3, area4] = document.querySelectorAll('textarea');
+  }
   // 监听原代码区内容变化
   let parseResult = null;
   let contentList = null;
