@@ -20,28 +20,21 @@ if(isDev) {
   fs.writeFileSync('./code_target.rpy', codeTarget);
 } else {
   // 注入输入框
-  const parent = document.querySelector('.lmt__text');
-  const trueArea = document.querySelector('.lmt__sides_container');
+  const parent = document.querySelectorAll('.space-y-6')[1];
+  const trueArea = parent.childNodes[1];
   const root = document.createElement('div');
-  root.className = 'lmt__sides_container';
-  root.style = "display: flex";
+  root.className = 'rounded-bl-inherit rounded-br-inherit grid grid-cols-1 grid-rows-[auto_auto] min-[768px]:grid-cols-[1fr_auto_1fr] min-[768px]:grid-rows-[1fr]'
   root.innerHTML = `
-    <div class="lmt__side_container lmt__side_container--source">
-      <div class="lmt__textarea_container" style="padding: 10px">
-        <div style="padding-bottom: 10px">输入源码</div>
-        <div class="lmt__inner_textarea_container">
-          <textarea class="lmt__textarea lmt__source_textarea lmt__textarea_base_style"
-            style="font-size: 14px;overflow-y: scroll;"></textarea>
-        </div>
+    <div class="rounded-inherit mb-0" style="padding: 10px">
+      <div style="padding-bottom: 10px">输入源码</div>
+      <div class="rounded-bl-inherit relative z-[1] min-h-[240px] min-w-0 md:min-h-[clamp(250px,50vh,557px)]">
+        <d-textarea class="w-full" style="font-size: 14px;overflow-y: scroll;"></d-textarea>
       </div>
     </div>
-    <div class="lmt__side_container lmt__side_container--target">
-      <div class="lmt__textarea_container" style="padding: 20px">
+    <div class="rounded-inherit mb-0" style="padding: 20px">
       <div style="padding-bottom: 10px">翻译后转换的源码</div>
-        <div class="lmt__inner_textarea_container">
-          <textarea class="lmt__textarea lmt__source_textarea lmt__textarea_base_style"
-            style="font-size: 14px;overflow-y: scroll;"></textarea>
-        </div>
+      <div class="rounded-bl-inherit relative z-[1] min-h-[240px] min-w-0 md:min-h-[clamp(250px,50vh,557px)]">
+        <d-textarea class="w-full" style="font-size: 14px;overflow-y: scroll;"></d-textarea>
       </div>
     </div>
   `;
