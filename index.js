@@ -19,50 +19,30 @@ if(isDev) {
   const codeTarget = translate2code(translateList, contentList, parseResult);
   fs.writeFileSync('./code_target.rpy', codeTarget);
 } else {
-  // 注入输入框
-  const parent = document.querySelector('.lmt__text');
-  const trueArea = document.querySelector('.lmt__sides_container');
-  const root = document.createElement('div');
-  root.className = 'lmt__sides_container';
-  root.style = "display: flex";
-  root.innerHTML = `
-    <div class="lmt__side_container lmt__side_container--source">
-      <div class="lmt__textarea_container" style="padding: 10px">
-        <div style="padding-bottom: 10px">输入源码</div>
-        <div class="lmt__inner_textarea_container">
-          <textarea class="lmt__textarea lmt__source_textarea lmt__textarea_base_style"
-            style="font-size: 14px;overflow-y: scroll;"></textarea>
-        </div>
-      </div>
-    </div>
-    <div class="lmt__side_container lmt__side_container--target">
-      <div class="lmt__textarea_container" style="padding: 20px">
-      <div style="padding-bottom: 10px">翻译后转换的源码</div>
-        <div class="lmt__inner_textarea_container">
-          <textarea class="lmt__textarea lmt__source_textarea lmt__textarea_base_style"
-            style="font-size: 14px;overflow-y: scroll;"></textarea>
-        </div>
-      </div>
-    </div>
-  `;
-  parent.insertBefore(root, trueArea);
-  let area1, area2, area3, area4;
-  // 存在d-textarea，非会员页面
-  if(document.querySelectorAll('d-textarea').length > 0) {
-    [area3, area4] = document.querySelectorAll('d-textarea');
-    [area1, area2] = document.querySelectorAll('textarea');
-  }
-  // 不存在textarea，会员页面
-  else {
-    [area1, area2, area3, area4] = document.querySelectorAll('textarea');
-  }
+  // 整体容器
+  const container = document.querySelector("div.rounded-inherit")
+  const secondEle = container.children[1]
+  // 要插入的元素，直接复制现有输入框
+  const root = document.createElement('div')
+  root.className = secondEle.className
+  root.innerHTML = secondEle.innerHTML
+  // 插入到容器第一位
+  const firstEle = container.children[0]
+  container.insertBefore(root, firstEle)
+  // 找到所有输入框
+  let [area1, area2, area3, area4] = document.querySelectorAll('d-textarea');
+  // 调整样式
+  area1.style.maxHeight = '500px'
+  area1.style.fontSize = '16px'
+  area2.style.maxHeight = '500px'
+  area2.style.fontSize = '16px'
   // 监听原代码区内容变化
   let parseResult = null;
   let contentList = null;
-  area1.addEventListener('input', (e) => {
+  area1.addEventListener('input', () => {
     // 处理后注入到翻译原文区
     console.log('检测到新源码输入，开始解析源码');
-    const value = e.target.value;
+    const value = area1.value
     const { parseResult: _parseResult, contentList: _contentList } = rpy2content(value);
     [parseResult, contentList] = [_parseResult, _contentList];
     console.log('源码解析结果:', parseResult);
