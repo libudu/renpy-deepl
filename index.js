@@ -36,6 +36,8 @@ if(isDev) {
   area1.style.fontSize = '16px'
   area2.style.maxHeight = '500px'
   area2.style.fontSize = '16px'
+  // 调整内容
+  area1.children[1].innerHTML = '<div>在这里粘贴 Renpy 待翻译的文本，目前仅支持 translate 语句，不支持 old/new 语句</div>'
   // 监听原代码区内容变化
   let parseResult = null;
   let contentList = null;
@@ -76,7 +78,7 @@ if(isDev) {
       console.log('翻译完成，翻译后的内容:', translateList);
       console.log('开始转换为新代码');
       const code = translate2code(translateList, contentList, parseResult);
-      area2.value = code;
+      area2.innerHTML = `<div data-content="true" contenteditable="true">${code}</div>`;
       console.log('处理完成');
     }
   }, 2000);
