@@ -47,7 +47,7 @@ if (isDev) {
   area1.addEventListener('input', () => {
     // 处理后注入到翻译原文区
     console.log('检测到新源码输入，开始解析源码')
-    const value = area1.children[0].textContent
+    const value = getTextareaContent(area1)
     const { parseResult: _parseResult, contentList: _contentList } =
       rpy2content(value)
     ;[parseResult, contentList] = [_parseResult, _contentList]
@@ -66,7 +66,7 @@ if (isDev) {
   // 轮询翻译后的结果
   let translateResult = null
   setInterval(() => {
-    const value = area4.children[0].textContent
+    const value = getTextareaContent(area4)
     // 新翻译结果
     const translateList = value ? value.replace(/\r/g, '').split('\n') : []
     if (!contentList) return
@@ -90,6 +90,11 @@ if (isDev) {
       console.log('处理完成')
     }
   }, 2000)
+}
+
+// 工具函数：提取 textarea 内的文本
+const getTextareaContent = (area) => {
+  return [...area.children[0].children].map((p) => p.textContent).join('\n')
 }
 
 // 解析rpy脚本，得出解析结果和内容
