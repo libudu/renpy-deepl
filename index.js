@@ -22,15 +22,16 @@ if (isDev) {
   fs.writeFileSync('./code_target.rpy', codeTarget)
 } else {
   // 整体容器
-  const container = document.querySelector('div.rounded-inherit')
+  const container = document.querySelectorAll('div.rounded-inherit')[1]
   const secondEle = container.children[1]
   // 要插入的元素，直接复制现有输入框
   const root = document.createElement('div')
   root.className = secondEle.className
   root.innerHTML = secondEle.innerHTML
-  // 插入到容器第一位
-  const firstEle = container.children[0]
-  container.insertBefore(root, firstEle)
+  for (const key in secondEle.dataset) {
+    root.dataset[key] = secondEle.dataset[key]
+  }
+  container.insertBefore(root, secondEle)
   // 找到所有输入框
   let [area1, area2, area3, area4] = document.querySelectorAll('d-textarea')
   // 调整样式
